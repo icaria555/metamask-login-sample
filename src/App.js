@@ -14,6 +14,8 @@ function App() {
     Balance: null,
     SignVisible: false
   });
+
+  const [res, setRes] = useState();
   
   // Button handler button for handling a
   // request event for metamask
@@ -64,9 +66,10 @@ function App() {
   const signMsg = async () => {
     const nonce_res = await axios({
       method: "post",
-      url: 'http://localhost:3000/api/tests/nonce',
+      url: 'http://localhost:3002/api/auth/nonce',
       data: {
-        walletAddress: data.address
+        walletAddress: data.address,
+        addressType: "EVM"
       }
     });
 
@@ -74,7 +77,7 @@ function App() {
 
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const signer = provider.getSigner();
-    console.log(JSON.stringify(nonce))
+    console.log(JSON.stringify(nonce));
     const sign = await Web3Token.sign(async msg => await signer.signMessage(msg), {
       statement: `AxelarNetwork`,
       expire_in: '1 days',
@@ -83,13 +86,18 @@ function App() {
 
     const res = await axios({
       method: "post",
-      url: 'http://localhost:3000/api/tests/signature',
+      url: 'http://localhost:3002/api/auth/sign',
       data: {
         walletAddress: data.address,
-        signature: sign
+        signature: sign,
+        addressType: 'EVM'
       }
     });
 
+    console.log('res')
+    console.log(res)
+
+    setRes(res.data.data.accessToken);
     console.log(res.data.data)
   }
   
@@ -110,6 +118,8 @@ function App() {
           </Button>
           <br/>
           {data.SignVisible ? <Button onClick={signMsg}>sign</Button> : ''}
+          <br/>
+          You Received: {res}
         </Card.Body>
       </Card>
     </div>
