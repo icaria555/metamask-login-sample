@@ -73,14 +73,13 @@ function App() {
       }
     });
 
-    const nonce = nonce_res.data.data;
+    const nonce = nonce_res.data.data.data;
+    console.log(nonce);
 
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const signer = provider.getSigner();
-    console.log(JSON.stringify(nonce));
     const sign = await Web3Token.sign(async msg => await signer.signMessage(msg), {
       statement: `AxelarNetwork`,
-      expire_in: '1 days',
       nonce: nonce,
     });
 
@@ -94,11 +93,20 @@ function App() {
       }
     });
 
-    console.log('res')
-    console.log(res)
-
     setRes(res.data.data.accessToken);
-    console.log(res.data.data)
+
+    alert('attemp signing with recieved access token:' + res.data.data.accessToken);
+
+    const res2 = await axios({
+      method: "get",
+      url: `http://localhost:3002/api/auth/verify?token=${res.data.data.accessToken}`,
+      maxRedirects: 0
+    });
+
+    alert('attemp verify the recieved access token:' + res2.data.data);
+
+    console.log('result')
+    console.log(res2)
   }
   
   return (
